@@ -100,6 +100,7 @@ def modify_booking(request, booking_id):
         'bus': booking.bus,
         'journey_date': booking.journey_date
     })
+
 @csrf_exempt
 def proceed_to_pay(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id, user=request.user)
