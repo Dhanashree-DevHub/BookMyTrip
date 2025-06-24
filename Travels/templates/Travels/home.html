@@ -37,8 +37,8 @@
     <div class="container my-4">
         <h2 class="text-center mb-4">Search for Buses</h2>
 
-        <p>Sources: {{sources}}</p>
-        <p>Destinations: {{destinations}}</p>
+        {% comment %} <p>Sources: {{sources}}</p>
+        <p>Destinations: {{destinations}}</p> {% endcomment %}
 
         <form method="GET" action="{% url 'search_buses' %}">
             <div class="mb-3">
