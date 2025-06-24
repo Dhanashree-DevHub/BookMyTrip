@@ -8,6 +8,7 @@ from django.db.models import Sum
 from .models import Bus, Booking
 from django.views.decorators.csrf import csrf_exempt
 
+
 def home(request):
     sources = Bus.objects.values_list('source', flat=True).distinct()
     destinations = Bus.objects.values_list('destination', flat=True).distinct()
