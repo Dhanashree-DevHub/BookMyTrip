@@ -13,12 +13,15 @@ class BookingForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if 'bus' in self.initial:
-            bus = self.initial['bus']
+        bus = None
+        if self.instance and hasattr(self.instance, 'bus'):
+            bus = self.instance.bus
+
+        if bus:
             self.fields['seats_booked'].widget = forms.NumberInput(attrs={
-                'min': 1,
-                'max': bus.available_seats,
-                'class': 'form-control'
+            'min': 1,
+            'max': bus.available_seats,
+            'class': 'form-control'
             })
 
     def clean_seats_booked(self):
