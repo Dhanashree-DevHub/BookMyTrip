@@ -7,15 +7,13 @@ from django.contrib import messages
 from django.db.models import Sum
 from .models import Bus, Booking
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+from .tasks import send_booking_confirmation_email
 
-
+@login_required
 def home(request):
     sources = Bus.objects.values_list('source', flat=True).distinct()
     destinations = Bus.objects.values_list('destination', flat=True).distinct()
-    
-    print("Home view loaded")
-    print("source:", sources)
-    print("destination:", destinations)
     buses = None
 
     if request.method == "GET" and 'from' in request.GET:
@@ -34,13 +32,12 @@ def home(request):
         'destinations': destinations,
         'buses': buses,
     })
-    print("sources:", sources)
-    print("destination:", destinations)
 
 def search_buses(request):
     source = request.GET.get('from')
     destination = request.GET.get('to')
     journey_date = request.GET.get('date')
+    request.session['journey_date']= journey_date
 
     buses = Bus.objects.filter(source=source, destination=destination)
 
@@ -50,19 +47,26 @@ def search_buses(request):
 
     return render(request, 'Travels/search_results.html', {'buses': buses, 'journey_date': journey_date})
 
-
+@login_required
 def book_ticket(request, bus_id):
     bus = get_object_or_404(Bus, id=bus_id)
-    journey_date = request.GET.get('date')
+    journey_date = request.GET.get('date') or request.session.get('journey_date')
     if request.method == "POST":
         form = BookingForm(request.POST)
         if form.is_valid():
             booking = form.save(commit=False)
             booking.user = request.user
-            booking.journey_date = form.cleaned_data['journey_date']
+            booking.journey_date = journey_date
             booking.total_price= booking.seats_booked * bus.price_per_seat
             bus.save()
             booking.save()
+            send_booking_confirmation_email.delay(
+                to_email=request.user.email,
+                bus_name=bus.name,
+                journey_date=str(booking.journey_date),
+                seats=booking.seats_booked,
+                total_price=booking.total_price
+            )
             messages.success(request, "Booking successful")
             return redirect('my_trips')
         else:
@@ -119,11 +123,17 @@ def proceed_to_pay(request, booking_id):
 
 # Create your views here.
 def signup(request):
+    if request.user.is_authenticated:
+        return redirect('home')
     if request.method == 'POST':
         username = request.POST.get('username')
         email = request.POST.get('email')
         password = request.POST.get('password')
         Confirm_password = request.POST.get('confirm_password')
+        
+        if User.objects.filter(email=email).exists():
+            messages.error(request, "Email already registered")
+            return render(request, 'Travels/signup.html')
 
         if password != Confirm_password:
             messages.error(request, "Password do not match")
