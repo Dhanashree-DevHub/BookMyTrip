@@ -45,4 +45,20 @@ To Do list:
 >> add payment gateway
 >> apply css to enhance UI
 >> add user email varification
->>deploy to cloud 
+>>deploy to cloud
+
+Screenshots:
+1.Login/Signup page
+![Login page](Screenshots/Bus_booking_login.jpg)
+2. Search Buses
+![Search bus](Screenshots/bus_booking_search.jpg)
+3. Available buses
+![Available buses](Screenshots/bus_booking_avlblBus.jpg)
+4. Confirm booking
+![Confirm booking](Screenshots/bus_booking_confirmBooking.jpg)
+5. My Bookings
+![My Bookings](Screenshots/bus_booking_mybookings.jpg)
+6. Payment process
+![Payment process](Screenshots/bus_booking_pay.jpg)
+
+
